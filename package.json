@@ -2,8 +2,8 @@
   "name": "react-app",
   "version": "1.0.0",
   "description": "React and JSX example starter project",
-  "homepage": "https://Rogerd97.github.io/Actualizado",  // Asegúrate de que esta URL sea correcta
-  "main": "src/index.jsx",  // Cambiado a index.jsx, ya que estamos usando JSX
+  "homepage": "https://Rogerd97.github.io/Actualizado",
+  "main": "src/index.jsx",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
