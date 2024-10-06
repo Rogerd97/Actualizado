@@ -2,13 +2,8 @@
   "name": "react-app",
   "version": "1.0.0",
   "description": "React and JSX example starter project",
-  "keywords": [
-    "react",
-    "starter",
-    "jsx"
-  ],
-  "homepage": "https://Rogerd97.github.io/Actualizado",
-  "main": "src/index.jsx",
+  "homepage": "https://Rogerd97.github.io/Actualizado",  // Asegúrate de que esta URL sea correcta
+  "main": "src/index.jsx",  // Cambiado a index.jsx, ya que estamos usando JSX
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -17,8 +12,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "predeploy": "npm run build", 
-    "deploy": "gh-pages -d build", 
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
