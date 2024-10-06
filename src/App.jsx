@@ -216,6 +216,9 @@ const App = () => {
   const [interestRate, setInterestRate] = useState(0);
   const [modalidadCredito, setModalidadCredito] = useState("Micro");
   const [tipologia, setTipologia] = useState("Rural");
+  const [fngPaymentOption, setFngPaymentOption] = useState("Diferido"); // Opciones: "Diferido", "Anticipado"
+  const [mipymePaymentOption, setMipymePaymentOption] = useState("Diferido"); // Opciones: "Diferido", "Anticipado"
+
 
   useEffect(() => {
     if (cultivoSeleccionado && modalidadPago) {
@@ -293,7 +296,9 @@ const App = () => {
     plazo,
     modalidad,
     fng,
-    mipymeRate
+    mipymeRate,
+    fngPaymentOption,
+    mipymePaymentOption
   ) => {
     const frecuenciaPago = {
       Mensual: 1,
@@ -313,24 +318,53 @@ const App = () => {
     const cuotaConstante =
       (capital * tasaPeriodica) / (1 - Math.pow(1 + tasaPeriodica, -periodos));
     const fngTotal = capital * fng;
-    const fngCuota = (fngTotal + fngTotal * 0.19) / periodos;
+    let fngCuota = 0;
+
+    let leyMipymeCuota = 0;
 
     let amortizacion = [];
     let saldo = capital;
     let mesesTranscurridos = 0;
-    let leyMipymeCuota = 0;
 
+    // Cálculo del FNG
+    if (fngPaymentOption === "Anticipado") {
+      // FNG cargado a la primera cuota
+      fngCuota = fngTotal + fngTotal * 0.19; // Incluye IVA
+    } else {
+      // FNG distribuido en todas las cuotas
+      fngCuota = (fngTotal + fngTotal * 0.19) / periodos;
+    }
+
+    // Cálculo de la Ley Mipyme
     for (let i = 1; i <= periodos; i++) {
       // Recalcular Ley Mipyme al inicio de cada año
       if (mesesTranscurridos % 12 === 0) {
         const leyMipymeAnual = saldo * mipymeRate;
         const periodosPorAno = Math.ceil(12 / mesesPorPeriodo);
-        leyMipymeCuota = leyMipymeAnual / periodosPorAno;
+        
+        if (mipymePaymentOption === "Anticipado") {
+          // Ley Mipyme cargada a la primera cuota del año
+          leyMipymeCuota = leyMipymeAnual + leyMipymeAnual * 0.19; // Incluye IVA
+        } else {
+          // Ley Mipyme distribuida en las cuotas del año
+          leyMipymeCuota = (leyMipymeAnual + leyMipymeAnual * 0.19) / periodosPorAno;
+        }
       }
 
       let interesCuota = saldo * tasaPeriodica;
       let capitalCuota = cuotaConstante - interesCuota;
-      let mipymeCuota = leyMipymeCuota;
+
+      let mipymeCuota = 0;
+      if (mipymePaymentOption === "Anticipado" && mesesTranscurridos % 12 === 0) {
+        mipymeCuota = leyMipymeCuota; // Cargado a la primera cuota del año
+      } else if (mipymePaymentOption === "Diferido") {
+        mipymeCuota = leyMipymeCuota;
+      }
+
+      // Ajustar el FNG según la opción seleccionada
+      let fngActual = fngPaymentOption === "Anticipado" && i === 1 ? fngCuota : fngCuota;
+
+      let cuotaTotal = cuotaConstante + fngActual + mipymeCuota;
 
       saldo -= capitalCuota;
       mesesTranscurridos += mesesPorPeriodo;
@@ -340,15 +374,16 @@ const App = () => {
         cuotaConstante: cuotaConstante.toFixed(2),
         capitalCuota: capitalCuota.toFixed(2),
         interesCuota: interesCuota.toFixed(2),
-        fngCuota: fngCuota.toFixed(2),
-        mipymeCuota: (mipymeCuota * 1.19).toFixed(2),
-        cuotaTotal: (cuotaConstante + fngCuota + mipymeCuota).toFixed(2),
+        fngCuota: fngActual.toFixed(2),
+        mipymeCuota: mipymeCuota.toFixed(2),
+        cuotaTotal: cuotaTotal.toFixed(2),
         saldoRestante: saldo.toFixed(2),
       });
     }
 
     return amortizacion;
   };
+
 
   const handleCultivoChange = (event) => {
     const cultivoKey = event.target.value;
@@ -514,13 +549,16 @@ const App = () => {
     const plazoMeses = plazoPeriodos * frecuenciaPago[modalidadPago];
     const fngRateAjustado = calcularFNG(capital, plazoMeses);
     const tasaMensual = interestRate;
+
     const amort = calcularAmortizacion(
       capital,
       tasaMensual,
       plazoPeriodos,
       modalidadPago,
       fngRateAjustado,
-      mipymeRate
+      mipymeRate,
+      fngPaymentOption,
+      mipymePaymentOption
     );
     setAmortizacion(amort);
     setError("");
@@ -632,6 +670,29 @@ const App = () => {
               )
             )}
           </select>
+
+          {/* Nuevos selectores para opciones de pago de FNG y Ley Mipyme */}
+          <div>
+            <p>Forma de Pago para FNG:</p>
+            <select
+              value={fngPaymentOption}
+              onChange={(e) => setFngPaymentOption(e.target.value)}
+            >
+              <option value="Diferido">Diferido</option>
+              <option value="Anticipado">Anticipado</option>
+            </select>
+          </div>
+          <div>
+            <p>Forma de Pago para Ley Mipyme:</p>
+            <select
+              value={mipymePaymentOption}
+              onChange={(e) => setMipymePaymentOption(e.target.value)}
+            >
+              <option value="Diferido">Diferido</option>
+              <option value="Anticipado">Anticipado</option>
+            </select>
+          </div>
+
           <div>
             <p>Modalidad de crédito:</p>
             <select
