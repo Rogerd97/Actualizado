@@ -318,7 +318,7 @@ const App = () => {
       (capital * tasaPeriodica) / (1 - Math.pow(1 + tasaPeriodica, -periodos));
 
     // FNG ya se ha calculado como fngRate * capital en handleCalcular
-    let fngCuota = 0; // No necesitamos esta variable ahora
+    //let fngCuota = 0; // No necesitamos esta variable ahora
 
     let leyMipymeCuota = 0;
 
@@ -579,6 +579,8 @@ const App = () => {
     setModalidadCredito("Micro");
     setTipologia("Rural");
     setMontoError("");
+    setFngPaymentOption("Diferido"); // Restablecer a "Diferido"
+    setMipymePaymentOption("Diferido"); // Restablecer a "Diferido"
   };
 
   return (
