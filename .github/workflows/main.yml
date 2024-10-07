@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -19,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Puedes ajustar la versión de Node.js según lo necesario
+          node-version: "16" # Puedes ajustar la versión de Node.js según lo necesario
 
       # Paso 3: Instalar las dependencias
       - name: Install dependencies
@@ -34,4 +36,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # Publica el contenido generado en la carpeta `build`
+          publish_dir: ./build # Publica el contenido generado en la carpeta `build`
