@@ -292,9 +292,9 @@ const App = () => {
   const calcularAmortizacion = (
     capital,
     tasaMensual,
-    plazo,
+    plazoPeriodos,
     modalidad,
-    fngTotal, // Monto total del FNG
+    fngTotal, // Monto total del FNG calculado previamente
     mipymeRate,
     fngPaymentOption,
     mipymePaymentOption
@@ -307,18 +307,16 @@ const App = () => {
       Semestral: 6,
     };
 
-    const periodos = plazo;
     const mesesPorPeriodo = frecuenciaPago[modalidad];
+    const plazoMeses = plazoPeriodos * mesesPorPeriodo;
     const tasaPeriodica = ajustarTasaInteresPorPeriodicidad(
       tasaMensual,
       modalidad
     );
 
     const cuotaConstante =
-      (capital * tasaPeriodica) / (1 - Math.pow(1 + tasaPeriodica, -periodos));
-
-    // FNG ya se ha calculado como fngRate * capital en handleCalcular
-    //let fngCuota = 0; // No necesitamos esta variable ahora
+      (capital * tasaPeriodica) /
+      (1 - Math.pow(1 + tasaPeriodica, -plazoPeriodos));
 
     let leyMipymeCuota = 0;
 
@@ -326,7 +324,7 @@ const App = () => {
     let saldo = capital;
     let mesesTranscurridos = 0;
 
-    for (let i = 1; i <= periodos; i++) {
+    for (let i = 1; i <= plazoPeriodos; i++) {
       // Recalcular Ley Mipyme al inicio de cada año
       if (mesesTranscurridos % 12 === 0) {
         const leyMipymeAnual = saldo * mipymeRate;
@@ -359,9 +357,10 @@ const App = () => {
       // Ajustar el FNG según la opción seleccionada
       let fngActual = 0;
       if (fngPaymentOption === "Anticipado" && i === 1) {
-        fngActual = fngTotal + fngTotal * 0.19; // Cargado a la primera cuota con IVA
+        fngActual = fngTotal * 1.19; // Cargado a la primera cuota con IVA
       } else if (fngPaymentOption === "Diferido") {
-        fngActual = fngTotal / periodos + (fngTotal / periodos) * 0.19; // Distribuido en todas las cuotas con IVA
+        // Distribuir el FNG proporcionalmente al número de meses por periodo
+        fngActual = (fngTotal / plazoMeses) * mesesPorPeriodo * 1.19;
       }
 
       let cuotaTotal = cuotaConstante + fngActual + mipymeCuota;
@@ -545,9 +544,10 @@ const App = () => {
       Semestral: 6,
     };
     const plazoPeriodos = plazo;
-    const plazoMeses = plazoPeriodos * frecuenciaPago[modalidadPago];
+    const mesesPorPeriodo = frecuenciaPago[modalidadPago];
+    const plazoMeses = plazoPeriodos * mesesPorPeriodo; // Cálculo total de meses
     const fngRateAjustado = calcularFNG(capital, plazoMeses);
-    const fngTotal = fngRateAjustado * capital; // Nuevo cálculo
+    const fngTotal = fngRateAjustado * capital; // Cálculo correcto del FNG Total
     const tasaMensual = interestRate;
 
     const amort = calcularAmortizacion(
@@ -555,7 +555,7 @@ const App = () => {
       tasaMensual,
       plazoPeriodos,
       modalidadPago,
-      fngTotal, // Pasar el monto total del FNG
+      fngTotal, // Pasar el monto total del FNG basado en meses
       mipymeRate,
       fngPaymentOption, // Opciones de pago FNG
       mipymePaymentOption // Opciones de pago Ley Mipyme
