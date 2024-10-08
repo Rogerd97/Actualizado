@@ -726,10 +726,11 @@ const App = () => {
             <input
               type="number"
               value={fngRate}
-              onChange={(e) => setFngRate(parseFloat(e.target.value))}
+              onChange={() => {}} // Remover la posibilidad de cambiar la tasa manualmente
               step="0.0001"
               min="0"
               max="1"
+              disabled // Deshabilitar el campo de entrada
             />
           </div>
           <div>
