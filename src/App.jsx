@@ -236,19 +236,28 @@ const App = () => {
   }, [cultivoSeleccionado, modalidadPago]);
 
   useEffect(() => {
-    if (monto && plazo) {
+    if (monto && plazo && modalidadPago) {
       const montoNum = parseFloat(monto);
-      setFngRate(calcularFNG(montoNum, plazo));
+      const frecuenciaPago = {
+        Mensual: 1,
+        Bimensual: 2,
+        Trimestral: 3,
+        Cuatrimestral: 4,
+        Semestral: 6,
+      };
+      const mesesPorPeriodo = frecuenciaPago[modalidadPago];
+      const plazoMeses = plazo * mesesPorPeriodo; // Cálculo total de meses
+      setFngRate(calcularFNG(montoNum, plazoMeses));
       setMipymeRate(calcularMipyme(montoNum));
       setInterestRate(calcularTasaInteres(montoNum));
     }
-  }, [monto, plazo, tipologia]); // Agregado 'tipologia' aquí
+  }, [monto, plazo, modalidadPago, tipologia]);
 
-  const calcularFNG = (monto, plazo) => {
+  const calcularFNG = (monto, plazoMeses) => {
     if (monto <= 32500000) {
-      return fngComisionMenor32500000[plazo] || 0;
+      return fngComisionMenor32500000[plazoMeses] || 0;
     } else {
-      return fngComisionMayor32500000[plazo] || 0;
+      return fngComisionMayor32500000[plazoMeses] || 0;
     }
   };
 
